@@ -18,22 +18,19 @@ local latencyPercentileRates = slo.latencyPercentileRates({
 local volumeSLO = slo.volumeSLO({
   rules: httpRates.rateRules,
   threshold: '5000',
-  selectors: ['route="cincinnati-route-prod"', 'status_class!="5xx"'],
 });
 local latencySLO = slo.latencySLO({
   rules: latencyPercentileRates.rules,
-  rulesBuilder: latencyPercentileRates.rulesBuilder,
   threshold: '3',
 });
 local errorsSLO = slo.errorsSLO({
   rules: httpRates.errorRateRules,
-  rulesBuilder: httpRates.errorRateRulesBuilder,
   threshold: '1',
-  selectors: ['route="cincinnati-route-prod"'],
 });
-local availabilitySLO = slo.availabilitySLO(
-  errorsSLO.rulesProductBuilder, latencySLO.rulesProductBuilder
-);
+local availabilitySLO = slo.availabilitySLO({
+  latencyRules: [latencySLO.rules],
+  errorsRules: [errorsSLO.rules],
+});
 
 {
   recordingrule:

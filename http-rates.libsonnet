@@ -7,7 +7,6 @@ local util = import '_util.libsonnet';
       labels: [],
       rates: ['5m', '30m', '1h', '2h', '6h', '1d'],
       codeSelector: 'code',
-      handlers: [],
     } + param,
 
     local labels =
@@ -35,7 +34,7 @@ local util = import '_util.libsonnet';
       for rate in std.uniq(slo.rates)
     ],
 
-    errorRateRulesBuilder: [
+    errorRateRules: [
       {
         expr: |||
           sum(%s{%s})
@@ -53,12 +52,6 @@ local util = import '_util.libsonnet';
         handlers:: slo.handlers,
       }
       for r in self.rateRules
-    ],
-
-    errorRateRules: if std.length(slo.handlers) == 0 then self.errorRateRulesBuilder else [
-      rule { labels+: { [h[0]]: std.strReplace(h[1], '"', '') } }
-      for rule in self.errorRateRulesBuilder
-      for h in std.map(function(handler) std.split(handler, '='), slo.handlers)
     ],
   },
 }
